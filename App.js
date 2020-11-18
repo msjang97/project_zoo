@@ -1,6 +1,6 @@
 import { StatusBar } from 'expo-status-bar';
 import React, { useState, Component, useEffect } from 'react';
-import { StyleSheet, Text, View, Image, BackHandler, Animated, TouchableOpacity, TouchableHighlight, Modal, Box } from 'react-native';
+import { StyleSheet, Text, View, Image, BackHandler, Animated, TouchableOpacity, TouchableHighlight, Modal, Box , ImageBackground} from 'react-native';
 import { NavigationContainer } from '@react-navigation/native';
 import { Button, Provider as PaperProvider, Title } from 'react-native-paper';
 import { createDrawerNavigator } from '@react-navigation/drawer';
@@ -57,14 +57,13 @@ function MainScreen({ navigation, route }) { //메인화면
   const increaseCounter = () => {
     setCounter(Money + 100);
   }
-  const uuuu = () => {
-    setCounter(route.params?.post + Money);
-  }
+ 
 
   const [visible, setVisible] = useState(false);  //다이얼로그 창(게임종료 여부)
   const showDialog = () => {
     setVisible(true);
   };
+
   const handleCancel = () => {
     setVisible(false);
   };
@@ -74,7 +73,18 @@ function MainScreen({ navigation, route }) { //메인화면
   };
 
   const moveToAnimal = () => {
-    navigation.navigate("Animal"); //동물탭? (상점)
+
+    if (route.params?.post == null) {
+      //setCounter(route.params?.post + Money);
+      navigation.navigate("Animal", { post: Money, ele : eleMoney })
+    }
+    else {
+      setCounter(route.params?.post + Money);
+      navigation.navigate("Animal", { post: Money + route.params?.post, ele : eleMoney});  //룰렛
+    }
+
+
+    //navigation.navigate("Animal"); //동물탭? (상점)
   }
   const moveToStore = () => {
     navigation.navigate("Store");  //편의시설(건물 상점)
@@ -83,11 +93,11 @@ function MainScreen({ navigation, route }) { //메인화면
     navigation.navigate("ZooKeeper");  //직원
   }
   const moveToAnimalBook = () => {
-    if (route.params?.postnum) {
-      navigation.navigate("AnimalBook", { Animal: true });  //도감
+    if (route.params?.postnum == 'ele') {
+      navigation.navigate("AnimalBook", { Animal: 'ele'});  //도감
     }
-    else if (route.params?.postnum == null) {
-      navigation.navigate("AnimalBook", { Animal: false });  //도감
+    else if (route.params?.postnum == 'gir') {
+      navigation.navigate("AnimalBook", { Animal: 'gir'});  //도감
     }
 
     //console.log(Ani);
@@ -95,6 +105,8 @@ function MainScreen({ navigation, route }) { //메인화면
   const moveToQuest = () => {
     navigation.navigate("Quest");  //업적
   }
+
+
   const moveToRoulette = () => {
     if (route.params?.post == null) {
       //setCounter(route.params?.post + Money);
@@ -103,7 +115,6 @@ function MainScreen({ navigation, route }) { //메인화면
     else {
       setCounter(route.params?.post + Money);
       navigation.navigate("Roulette", { post: Money + route.params?.post });  //룰렛
-
     }
   }
 
@@ -119,14 +130,37 @@ function MainScreen({ navigation, route }) { //메인화면
 
   useEffect(() => {
     if (route.params?.post) {
+     
     }
   }, [route.params?.post]);
 
   useEffect(() => {
-    if (route.params?.postnum) {
-      hide();
-      triger();
-      console.log(Ani);
+    if (route.params?.aaaa) {
+      setCounter(route.params?.aaaa);
+      
+    }
+  }, [route.params?.aaaa]);
+
+  const [eleMoney, setEleMoney] = useState(0);     //돈 증가 감소
+  //eleMoney값 받아오기
+  useEffect(() => {
+    if (route.params?.ele) {
+      setEleMoney(route.params?.ele); 
+    }
+  }, [route.params?.aaaa]);
+
+
+  useEffect(() => {
+    if (route.params?.postnum == 'ele') {
+      Ele();
+      //triger();
+      //console.log(Ani);
+    }
+
+    else if(route.params?.postnum == 'gir')
+    {
+      Gir();
+      //triger();
     }
   }, [route.params?.postnum]);
 
@@ -136,41 +170,59 @@ function MainScreen({ navigation, route }) { //메인화면
     }
   }, [route.params?.Animal]);
 
-  let Ani = false;
 
-  const triger = () => {
-    Ani = true;
-  }
 
   const [image, imageC_M] = useState();
-  const hide = () => {
-    imageC_M(require('./assets/monkey.png'));
+  const Ele = () => {
+    imageC_M(require('./assets/elephant.png'));
+  }
+  const Gir = () => {
+    imageC_M(require('./assets/giraffe.png'));
   }
 
-
+  
   return (
-
+    
     <PaperProvider>
+     
       <View style={styles.AppBarStyle}>
         <StatusBar hidden={true} />
-
         <Modal
           animationType="fade"
           transparent={true}
-
           visible={modalVisible}
           onRequestClose={() => {
             Alert.alert('Modal has been closed.');
           }}>
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
-           
-              <Text style={styles.modalText}>환경설정</Text>                         
-              <Button contentStyle={{ height: 50, width: 103 }} mode="contained" onPress={() => { setSoundModalVisible(!soundModalVisible); }}> 소리설정 </Button>
-              <Text></Text>
-              <Button contentStyle={{ height: 50, width: 103 }} mode="contained" onPress={() => { setExplnModalVisible(!explnModalVisible); }}> 게임설명 </Button>
-              <Text></Text>
-              <Button contentStyle={{ height: 50, width: 103 }} mode="contained" onPress={() => { setModalVisible(!modalVisible); }}> 나가기 </Button>
+              <View style={styles.SettingScreen}>
+                <Image style={{ height: 40, width: 40, resizeMode: 'contain', flex: 1 }} backgroundColor='white' source={require('./assets/setting.png')} />
+                <View style={{ flex: 2 }}>
+                  <Text style={{ textAlign: 'center', fontSize: 30 }}>환경설정</Text>
+                </View>
+
+                <View style={{ width: 40, height: 40, flex: 1, alignItems: 'center', }}>
+                  <TouchableOpacity onPress={() => {
+                    setModalVisible(!modalVisible);
+                  }}>
+                    <Image style={{ height: 40, width: 40, resizeMode: 'contain' }} backgroundColor='white' source={require('./assets/cancel.png')} />
+                  </TouchableOpacity>
+                </View>
+
+              </View>
+              <View style={{ flex: 1, flexDirection: 'row' }}>
+                <View>
+                  <Button Style={{ height: 50, width: 130 }} mode="contained" onPress={() => { setSoundModalVisible(!soundModalVisible); }}> 소리설정 </Button>
+                </View>
+              </View>
+
+              <View style={{ flex: 1, flexDirection: 'row' }}>
+                <View>
+                  <Button Style={{ height: 50, width: 130 }} mode="contained" onPress={() => { setExplnModalVisible(!explnModalVisible); }}> 게임설명 </Button>
+                </View>
+              </View>
+
             </View>
           </View>
         </Modal>
@@ -185,17 +237,29 @@ function MainScreen({ navigation, route }) { //메인화면
           }}>
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
-              <Text style={styles.modalText}>소리설정</Text>
-        
-              <Button contentStyle={{ height: 50, width: 103 }} mode="contained" onPress={() => {
-                setSoundModalVisible(!soundModalVisible);
-              }}> 뒤로가기 </Button>
+              <View style={styles.SettingScreen}>
+                <Image style={{ height: 40, width: 40, resizeMode: 'contain', flex: 1 }} backgroundColor='white' source={require('./assets/setting.png')} />
+                <View style={{ flex: 2 }}>
+                  <Text style={{ textAlign: 'center', fontSize: 30 }}>소리설정</Text>
+                </View>
 
-          <Button contentStyle={{ height: 50, width: 103 }} mode="contained" onPress={() => {
-                setModalVisible(!modalVisible);
-                setSoundModalVisible(!soundModalVisible);
-              }}> 나가기 </Button>
+                <View style={{ width: 40, height: 40, flex: 1, alignItems: 'center', }}>
+                  <TouchableOpacity onPress={() => {
+                    setModalVisible(!modalVisible);
+                    setSoundModalVisible(!soundModalVisible);
+                  }}>
+                    <Image style={{ height: 40, width: 40, resizeMode: 'contain' }} backgroundColor='white' source={require('./assets/cancel.png')} />
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View>
+                <View>
+                  <Button Style={{ height: 50, width: 130 }} mode="contained" onPress={() => {
+                    setSoundModalVisible(!soundModalVisible);
+                  }}> 뒤로가기 </Button>
+                </View>
 
+              </View>
             </View>
           </View>
         </Modal>
@@ -209,44 +273,32 @@ function MainScreen({ navigation, route }) { //메인화면
           }}>
           <View style={styles.centeredView}>
             <View style={styles.modalView}>
-              <Text style={styles.modalText}>게임설명</Text>
-              <Text>게임 설명 1</Text>
-              <Text>게임 설명 2</Text>
-              <Text>게임 설명 3</Text>
-              <Text>게임 설명 4</Text>
-              <Button contentStyle={{ height: 50, width: 103 }} mode="contained" onPress={() => {
+              <View style={styles.SettingScreen}>
+                <Image style={{ height: 40, width: 40, resizeMode: 'contain', flex: 1 }} backgroundColor='white' source={require('./assets/setting.png')} />
+                <View style={{ flex: 2 }}>
+                  <Text style={{ textAlign: 'center', fontSize: 30 }}>게임설명</Text>
+                </View>
+                <View style={{ width: 40, height: 40, flex: 1, alignItems: 'center', }}>
+                  <TouchableOpacity onPress={() => {
+                    setModalVisible(!modalVisible);
+                    setExplnModalVisible(!explnModalVisible);
+                  }}>
+                    <Image style={{ height: 40, width: 40, resizeMode: 'contain' }} backgroundColor='white' source={require('./assets/cancel.png')} />
+                  </TouchableOpacity>
+                </View>
+              </View>
+              <View style={{ flex: 3, flexDirection: 'row' }}>
+                <View>
+                  <Button Style={{ height: 50, width: 130 }} mode="contained" onPress={() => {
+                    setExplnModalVisible(!explnModalVisible);
+                  }}> 뒤로가기 </Button>
+                </View>
 
-                setExplnModalVisible(!explnModalVisible);
-              }}> 뒤로가기 </Button>
-              
-              <Button contentStyle={{ height: 50, width: 103 }} mode="contained" onPress={() => {
-                setModalVisible(!modalVisible);
-                setExplnModalVisible(!explnModalVisible);
-              }}> 나가기 </Button>
+              </View>
             </View>
           </View>
         </Modal>
-
-
-        <View style={styles.TopStyle}>
-          <Image style={{ height: 40, width: 40, resizeMode: 'contain' }} backgroundColor='yellow' source={require('./assets/dollar.png')} />
-
-          <Text style={{ height: 40, width: 250, alignItems: 'center', justifyContent: 'center', fontSize: 30 }}>  {(route.params?.post != null) ? route.params?.post + Money : Money} </Text>
-
-          <Button icon={require('./assets/medal.png')} mode="contained" compact="true" color="red" contentStyle={{ height: 40, width: 40 }}
-            labelStyle={{ color: "white", fontSize: 20 }} onPress={moveToQuest} >
-          </Button>
-
-          <Button icon={require('./assets/book.png')} mode="contained" compact="true" color="green" contentStyle={{ height: 40, width: 40 }}
-            labelStyle={{ color: "white", fontSize: 20 }} onPress={moveToAnimalBook}>
-          </Button>
-          <Button icon={require('./assets/setting.png')} mode="contained" compact="true" color="blue" contentStyle={{ height: 40, width: 40 }}
-            labelStyle={{ color: "white", fontSize: 20 }} onPress={() => {
-              setModalVisible(true);
-            }}>
-          </Button>
-        </View>
-
+        
         <Dialog.Container onBackdropPress={handleCancel} visible={visible}>
           <Dialog.Title>환경설정</Dialog.Title>
           <Dialog.Input>게임종료 하시겠습니까?</Dialog.Input>
@@ -256,52 +308,84 @@ function MainScreen({ navigation, route }) { //메인화면
         </Dialog.Container>
 
 
-        <View style={styles.MainScreenAni}>
-          <Image
-            style={{ height: 50, width: 50, resizeMode: 'contain' }}
-            source={image} />
+        <View style={styles.TopStyle}>
+          <Image style={{ height: 40, width: 40, resizeMode: 'contain' }} backgroundColor='yellow' source={require('./assets/dollar.png')} />
+
+          <Text style={{ height: 40, width: 250, alignItems: 'center', justifyContent: 'center', fontSize: 30 }}>  {(route.params?.post != null) ? route.params?.post + Money : Money} </Text>
+
+          <Button icon={require('./assets/medal.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 40 }}
+            labelStyle={{ color: "white", fontSize: 20 }} onPress={moveToQuest} >
+          </Button>
+          <Button icon={require('./assets/book.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 40 }}
+            labelStyle={{ color: "white", fontSize: 20 }} onPress={moveToAnimalBook}>
+          </Button>
+          <Button icon={require('./assets/setting.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 40 }}
+            labelStyle={{ color: "white", fontSize: 20 }} onPress={() => {
+              setModalVisible(true);
+            }}>
+          </Button>
         </View>
 
 
-        <View style={styles.MainScreenStyle}>
-          <TouchableOpacity
-            onPress={increaseCounter}>
-            <Image
-              style={{ height: 200, width: 200, resizeMode: 'contain' }}
-              source={require('./assets/Home.png')} />
-          </TouchableOpacity>
-        </View>
 
+        <View style={{ flex: 6, }}>
+
+          
+
+          <ImageBackground source={require('./assets/Background.jpg')} style={{ resizeMode: 'cover', justifyContent: 'center', flex: 1}}>
+
+          
+
+            <View style={styles.MainScreenStyle}>
+              <TouchableOpacity
+                onPress={increaseCounter}>
+                <Image
+                  style={{ height: 200, width: 200, resizeMode: 'contain' }}
+                  source={require('./assets/Home.png')} />
+              </TouchableOpacity>
+            </View>
+
+            <View style={styles.MainScreenAni}>
+              <Image
+                style={{ height: 50, width: 50, resizeMode: 'contain' }}
+                source={image} />
+            </View>
+
+          </ImageBackground>
+        </View>
+       
 
         <View style={styles.ButtenStyle}>
-          <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="red" contentStyle={{ height: 50, width: 103 }}
-            labelStyle={{ color: "white", fontSize: 16 }} onPress={moveToAnimal}>
+          <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="gray" contentStyle={{ height: 45, width: 103.5 }}
+            labelStyle={{ color: "white", fontSize: 18 }} onPress={moveToAnimal}>
             동물
       </Button>
-          <Button icon={require('./assets/building.png')} mode="contained" compact="true" color="green" contentStyle={{ height: 50, width: 103 }}
-            labelStyle={{ color: "white", fontSize: 16 }} onPress={moveToStore}>
+          <Button icon={require('./assets/building.png')} mode="contained" compact="true" color="gray" contentStyle={{ height: 45, width: 103.5 }}
+            labelStyle={{ color: "white", fontSize: 18 }} onPress={moveToStore}>
             편의시설
       </Button>
-          <Button icon={require('./assets/zookeeper.png')} mode="contained" compact="true" color="blue" contentStyle={{ height: 50, width: 103 }}
-            labelStyle={{ color: "white", fontSize: 16 }} onPress={moveToZooKeeper}>
+          <Button icon={require('./assets/zookeeper.png')} mode="contained" compact="true" color="gray" contentStyle={{ height: 45, width: 103.5 }}
+            labelStyle={{ color: "white", fontSize: 18 }} onPress={moveToZooKeeper}>
             직원
       </Button>
-          <Button icon={require('./assets/Egg.png')} mode="contained" compact="true" contentStyle={{ height: 50, width: 103 }}
-            labelStyle={{ color: "white", fontSize: 16 }} onPress={moveToRoulette}>
+          <Button icon={require('./assets/Egg.png')} mode="contained" compact="true" color ="gray" contentStyle={{ height: 45, width: 103.5 }}
+            labelStyle={{ color: "white", fontSize: 18 }} onPress={moveToRoulette}>
             뽑기
       </Button>
         </View>
       </View>
     </PaperProvider>
-
   );
 }
 
 function AnimalScreen({ navigation, route }) { //동물 씬
 
+
+  
+
   useEffect(() => {
     if (route.params?.post) {
-      //uuuu( );
+      setCounter(route.params?.post);
     }
   }, [route.params?.post]);
 
@@ -311,15 +395,65 @@ function AnimalScreen({ navigation, route }) { //동물 씬
     }
   }, [route.params?.postnum]);
 
-  const [visible, setVisible] = useState(false);  //동물 샀는지 안샀는지
-  const ssss = () => {
-    setVisible(true);
+  useEffect(() => {
+    if (route.params?.ele) {
+      setEleMoney(route.params?.ele);
+    }
+  }, [route.params?.ele]);
+
+
+  const [visible, setVisible] = useState('');  //동물 샀는지 안샀는지
+  const [Money, setCounter] = useState(0);     //돈 증가 감소
+  const [eleMoney, setEleMoney] = useState(100);     //돈 증가 감소
+
+
+
+
+  const aaaaa =(a) => {
+    if(a == 'ele')
+    {
+      if(Money >= 100)
+      {
+        setVisible('ele');
+        setCounter(Money - eleMoney);
+      }
+    }
+    else if(a == 'gir')
+    {
+      if(Money >= 200)
+      {
+        setVisible('gir');
+        setCounter(Money - 200);
+      }
+    }
   }
+  
+  
+
+  const ele = () => {
+    if(Money >= eleMoney)
+    {
+      setVisible('ele');
+      setCounter(Money - eleMoney);
+      setEleMoney(eleMoney + 20);
+    }
+  }
+  const gir = () => {
+    if(Money >= 200)
+    {
+      setVisible('gir');
+      setCounter(Money - 200);
+    }
+    
+  }
+
+  
+
   //navigation.navigate("Roulette", {post: Money})
   const moveToMain = () => {
     if (route.params?.postnum == null) {
       //setCounter(route.params?.post + Money);
-      navigation.navigate("Main", { postnum: visible })
+      navigation.navigate("Main", { postnum: visible, aaaa: Money, ele: eleMoney})
     }
     else {
       //setCounter(route.params?.post + Money);
@@ -327,97 +461,254 @@ function AnimalScreen({ navigation, route }) { //동물 씬
     }
   }
 
+  
+
+
   return (
-    <View>
-    <View style={styles.quest}>
-        <View style={{flex : 1}}>
-          <Text>동물</Text>
-        </View>       
-        <View>
-          <Button mode="contained" compact="true" color="black" contentStyle={{ height: 50, width: 103 }}
-            labelStyle={{ color: "white", fontSize: 16 }} onPress={moveToMain}> X
-          </Button>
+    <View style={{flex : 1}}>
+      <StatusBar hidden={true} />
+     
+      <View style={{ backgroundColor: 'black', flexDirection: 'row' , flex : 0.55}}>
+        <View style={{ backgroundColor: '#F3B438', height: 46, flex: 2, alignItems: 'center', justifyContent: 'center', margin: 2 }}>
+          <Image 
+            style={{ height: 50, width: 50, resizeMode: 'contain' }}
+            source={require('./assets/Title_Image.png')} />
+        </View>
+
+        <View style={{ backgroundColor: '#F3B438', height: 46, flex: 5, alignItems: 'center', justifyContent: 'center', margin: 2 }}>
+          <Text style={{ fontSize: 35 }} >동물</Text>
+        </View>
+        <View style={{ backgroundColor: '#F3B438', height: 46, flex: 1, alignItems: 'center', justifyContent: 'center', margin: 2 }}>
+          <TouchableOpacity onPress={moveToMain}>
+            <Image style={{ height: 40, width: 40, resizeMode: 'contain' }} source={require('./assets/cancel.png')} />
+          </TouchableOpacity>
         </View>
       </View>
 
-      <View style={styles.AnimalSceenBackColor} >
-        <StatusBar hidden={true} />
-        
+      <View style={{flex : 6}}>  
         <ScrollView>
-          <View style={styles.AnimalSceenStyle}>
-            <Image  //코끼리
-              style={{ height: 100, width: 100, resizeMode: 'contain' }}
-              source={require('./assets/elephant.png')} backgroundColor='brown' />
-            <Text style={{ fontSize: 30 }} > 코끼리 </Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="red" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }} onPress={ssss}> 구입
-             </Button>
+          <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+            <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+                <Image  //코끼리
+                  style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                  source={require('./assets/elephant.png')}/>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+                <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>코끼리</Text>
+                  <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                    <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>{eleMoney}</Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                  <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                    labelStyle={{ color: "black", fontSize: 16 }} onPress ={ele}> 구입
+                </Button>
+                </View>
+              </View>
+            </View>
           </View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image  //기린
-              style={{ height: 100, width: 100, resizeMode: 'contain' }}
-              source={require('./assets/giraffe.png')} backgroundColor='brown' />
-            <Text style={{ fontSize: 30 }} >   기린   </Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 구입
-             </Button>
+
+          <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+            <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+                <Image  //코끼리
+                  style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                  source={require('./assets/giraffe.png')}/>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+                <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>기린</Text>
+                  <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                    <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>돈</Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                  <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                    labelStyle={{ color: "black", fontSize: 16 }} onPress ={gir}> 구입
+                </Button>
+                </View>
+              </View>
+            </View>
           </View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image  //원숭이
-              style={{ height: 100, width: 100, resizeMode: 'contain' }}
-              source={require('./assets/monkey.png')} backgroundColor='brown' />
-            <Text style={{ fontSize: 30 }} > 원숭이 </Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 구입
-             </Button>
+
+          <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+            <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+                <Image  //코끼리
+                  style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                  source={require('./assets/monkey.png')}/>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+                <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>원숭이</Text>
+                  <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                    <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>돈</Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                  <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                    labelStyle={{ color: "black", fontSize: 16 }}> 구입
+                </Button>
+                </View>
+              </View>
+            </View>
           </View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image  //펭귄
-              style={{ height: 100, width: 100, resizeMode: 'contain' }}
-              source={require('./assets/penguin.png')} backgroundColor='brown' />
-            <Text style={{ fontSize: 30 }} >   펭귄   </Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 구입
-             </Button>
+          
+          <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+            <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+                <Image  //코끼리
+                  style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                  source={require('./assets/penguin.png')}/>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+                <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>펭귄</Text>
+                  <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                    <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>돈</Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                  <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                    labelStyle={{ color: "black", fontSize: 16 }}> 구입
+                </Button>
+                </View>
+              </View>
+            </View>
           </View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image   //호랑이
-              style={{ height: 100, width: 100, resizeMode: 'contain' }}
-              source={require('./assets/tiger.png')} backgroundColor='brown' />
-            <Text style={{ fontSize: 30 }} > 호랑이 </Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 구입
-             </Button>
+
+          <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+            <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+                <Image  //코끼리
+                  style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                  source={require('./assets/tiger.png')}/>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+                <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>호랑이</Text>
+                  <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                    <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>돈</Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                  <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                    labelStyle={{ color: "black", fontSize: 16 }}> 구입
+                </Button>
+                </View>
+              </View>
+            </View>
           </View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image   //사자
-              style={{ height: 100, width: 100, resizeMode: 'contain' }}
-              source={require('./assets/lion.png')} backgroundColor='brown' />
-            <Text style={{ fontSize: 30 }} >   사자   </Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 동물
-             </Button>
+
+          <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+            <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+                <Image  //코끼리
+                  style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                  source={require('./assets/lion.png')}/>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+                <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>사자</Text>
+                  <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                    <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>돈</Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                  <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                    labelStyle={{ color: "black", fontSize: 16 }}> 구입
+                </Button>
+                </View>
+              </View>
+            </View>
           </View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image   //사자
-              style={{ height: 100, width: 100, resizeMode: 'contain' }}
-              source={require('./assets/lion.png')} backgroundColor='brown' />
-            <Text style={{ fontSize: 30 }} >   사자   </Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 동물
-             </Button>
+
+          <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+            <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+                <Image  //코끼리
+                  style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                  source={require('./assets/elephant.png')}/>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+                <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>코끼리</Text>
+                  <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                    <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>돈</Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                  <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                    labelStyle={{ color: "black", fontSize: 16 }}> 구입
+                </Button>
+                </View>
+              </View>
+            </View>
           </View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image   //사자
-              style={{ height: 100, width: 100, resizeMode: 'contain' }}
-              source={require('./assets/lion.png')} backgroundColor='brown' />
-            <Text style={{ fontSize: 30 }} >   사자   </Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 동물
-             </Button>
+
+          <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+            <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+                <Image  //코끼리
+                  style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                  source={require('./assets/elephant.png')}/>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+                <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>코끼리</Text>
+                  <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                    <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>돈</Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                  <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                    labelStyle={{ color: "black", fontSize: 16 }}> 구입
+                </Button>
+                </View>
+              </View>
+            </View>
+          </View>
+          
+          <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+            <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+                <Image  //코끼리
+                  style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                  source={require('./assets/elephant.png')}/>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+                <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>코끼리</Text>
+                  <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                    <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>돈</Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                  <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                    labelStyle={{ color: "black", fontSize: 16 }}> 구입
+                </Button>
+                </View>
+              </View>
+            </View>
           </View>
         </ScrollView>
       </View>
+        
+      <View style={{ flex: 0.5, backgroundColor: '#F3B438', flexDirection: 'row', justifyContent: 'center' }}>
+        <View style={{ backgroundColor: 'black', flex: 1 , justifyContent : 'center', alignItems: 'center'}}>
+          <View style={{backgroundColor: '#F3B438', width : 100, alignItems:'center'}}>
+            <Image style={{ height: 40, width: 40, resizeMode: 'contain', }} source={require('./assets/dollar.png')} />
+          </View>
+        </View>
+        <View style={{ alignItems: 'center', backgroundColor: 'black', flex: 3 }}>
+          <View style={{backgroundColor: '#F3B438', height : 40,  width : 300, margin : 3, justifyContent : 'center', alignItems : 'flex-end'}}>
+            <Text style={{fontSize : 25}}>{Money}</Text>
+          </View>
+        </View>
+      </View>
+
     </View>
   );
 }
@@ -428,66 +719,272 @@ function StoreScreen({ navigation }) { //상점 씬
   }
 
   return (
-    <View style={styles.StoreSceenBackColor} >
-      <StatusBar hidden={true} />
-      <ScrollView>
-        <View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image
-              style={{ height: 100, width: 100, resizeMode: 'contain' }}
-              source={require('./assets/drink.png')} backgroundColor='yellow' />
-            <Text style={{ fontSize: 30 }} > 음료수가게</Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="red" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 구입
-             </Button>
+    <View style ={{flex : 1}}>
+      <View style={{ backgroundColor: 'black', flexDirection: 'row', flex : 0.55 }}>
+        <View style={{ backgroundColor: '#F3B438', height: 46, flex: 2, alignItems: 'center', justifyContent: 'center', margin: 2 }}>
+          <Image  
+            style={{ height: 50, width: 50, resizeMode: 'contain' }}
+            source={require('./assets/Title_Image.png')} />
+        </View>
+
+        <View style={{ backgroundColor: '#F3B438', height: 46, flex: 5, alignItems: 'center', justifyContent: 'center', margin: 2 }}>
+          <Text style={{ fontSize: 35 }} >편의시설</Text>
+        </View>
+        <View style={{ backgroundColor: '#F3B438', height: 46, flex: 1, alignItems: 'center', justifyContent: 'center', margin: 2 }}>
+          <TouchableOpacity onPress={moveToMain}>
+            <Image style={{ height: 40, width: 40, resizeMode: 'contain' }} source={require('./assets/cancel.png')} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={{flex : 6}}>  
+        <StatusBar hidden={true} />
+        <ScrollView>
+          <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+            <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+                <Image  //음료수
+                  style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                  source={require('./assets/drink.png')}/>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+                <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>음료수가게</Text>
+                  <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                    <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>돈</Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                  <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                    labelStyle={{ color: "black", fontSize: 16 }}> 구입
+                </Button>
+                </View>
+              </View>
+            </View>
           </View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image
-              style={{ height: 100, width: 100, resizeMode: 'contain' }}
-              source={require('./assets/churros.png')} backgroundColor='yellow' />
-            <Text style={{ fontSize: 30 }} >츄러스가게</Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 구입
-             </Button>
+
+          <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+            <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+                <Image  //코끼리
+                  style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                  source={require('./assets/churros.png')}/>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+                <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>츄러스가게</Text>
+                  <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                    <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>돈</Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                  <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                    labelStyle={{ color: "black", fontSize: 16 }}> 구입
+                </Button>
+                </View>
+              </View>
+            </View>
           </View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image
-              style={{ height: 100, width: 100, resizeMode: 'contain' }}
-              source={require('./assets/balloon.png')} backgroundColor='yellow' />
-            <Text style={{ fontSize: 30 }} > 풍선가게  </Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 구입
-             </Button>
+
+          <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+            <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+                <Image  //코끼리
+                  style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                  source={require('./assets/balloon.png')}/>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+                <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>풍선가게</Text>
+                  <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                    <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>돈</Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                  <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                    labelStyle={{ color: "black", fontSize: 16 }}> 구입
+                </Button>
+                </View>
+              </View>
+            </View>
           </View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image
-              style={{ height: 100, width: 100, resizeMode: 'contain' }}
-              source={require('./assets/popcorn.png')} backgroundColor='yellow' />
-            <Text style={{ fontSize: 30 }} > 팝콘가게  </Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 구입
-             </Button>
+          
+          <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+            <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+                <Image  //코끼리
+                  style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                  source={require('./assets/popcorn.png')}/>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+                <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>팝콘가게</Text>
+                  <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                    <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>돈</Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                  <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                    labelStyle={{ color: "black", fontSize: 16 }}> 구입
+                </Button>
+                </View>
+              </View>
+            </View>
           </View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image
-              style={{ height: 100, width: 100, resizeMode: 'contain' }}
-              source={require('./assets/teddybear.png')} backgroundColor='yellow' />
-            <Text style={{ fontSize: 30 }} > 인형가게  </Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 구입
-             </Button>
+
+          <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+            <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+                <Image  
+                  style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                  source={require('./assets/teddybear.png')}/>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+                <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>인형가게</Text>
+                  <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                    <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>돈</Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                  <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                    labelStyle={{ color: "black", fontSize: 16 }}> 구입
+                </Button>
+                </View>
+              </View>
+            </View>
           </View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image
-              style={{ height: 100, width: 100, resizeMode: 'contain' }}
-              source={require('./assets/restaurant.png')} backgroundColor='yellow' />
-            <Text style={{ fontSize: 30 }} > 레스토랑  </Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 구입
-             </Button>
+
+          <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+            <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+                <Image 
+                  style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                  source={require('./assets/restaurant.png')}/>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+                <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>레스토랑</Text>
+                  <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                    <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>돈</Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                  <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                    labelStyle={{ color: "black", fontSize: 16 }}> 구입
+                </Button>
+                </View>
+              </View>
+            </View>
+          </View>
+
+          <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+            <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+                <Image 
+                  style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                  source={require('./assets/restaurant.png')}/>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+                <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>레스토랑</Text>
+                  <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                    <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>돈</Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                  <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                    labelStyle={{ color: "black", fontSize: 16 }}> 구입
+                </Button>
+                </View>
+              </View>
+            </View>
+          </View>
+
+          <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+            <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+                <Image 
+                  style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                  source={require('./assets/restaurant.png')}/>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+                <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>레스토랑</Text>
+                  <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                    <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>돈</Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                  <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                    labelStyle={{ color: "black", fontSize: 16 }}> 구입
+                </Button>
+                </View>
+              </View>
+            </View>
+          </View>
+
+          <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+            <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+                <Image 
+                  style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                  source={require('./assets/restaurant.png')}/>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+                <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>레스토랑</Text>
+                  <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                    <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>돈</Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                  <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                    labelStyle={{ color: "black", fontSize: 16 }}> 구입
+                </Button>
+                </View>
+              </View>
+            </View>
+          </View>
+
+          <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+            <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+                <Image 
+                  style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                  source={require('./assets/restaurant.png')}/>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+                <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>레스토랑</Text>
+                  <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                    <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>돈</Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                  <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                    labelStyle={{ color: "black", fontSize: 16 }}> 구입
+                </Button>
+                </View>
+              </View>
+            </View>
+          </View>
+         
+        </ScrollView>
+      </View>
+      <View style={{ flex: 0.5, backgroundColor: '#F3B438', flexDirection: 'row', justifyContent: 'center' }}>
+        <View style={{ backgroundColor: 'black', flex: 1 , justifyContent : 'center', alignItems: 'center'}}>
+          <View style={{backgroundColor: '#F3B438', width : 100, alignItems:'center'}}>
+            <Image style={{ height: 40, width: 40, resizeMode: 'contain', }} source={require('./assets/dollar.png')} />
           </View>
         </View>
-      </ScrollView>
+        <View style={{ alignItems: 'center', backgroundColor: 'black', flex: 3 }}>
+          <View style={{backgroundColor: '#F3B438', height : 40,  width : 300, margin : 3, justifyContent : 'center', alignItems : 'flex-end'}}>
+            <Text style={{fontSize : 25}}>12345</Text>
+          </View>
+        </View>
+      </View>
+
     </View>
   );
 }
@@ -498,66 +995,249 @@ function ZooKeeperScreen({ navigation }) { //직원 탭
     navigation.navigate("Main");
   }
   return (
-    <View style={styles.ZookeeperSceenBackColor} >
-      <StatusBar hidden={true} />
-      <ScrollView>
-        <View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image
-              style={{ height: 100, width: 100, resizeMode: 'contain' }}
-              source={require('./assets/elephant.png')} backgroundColor='skyblue' />
-            <Text style={{ fontSize: 30 }} >코끼리사육사</Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="red" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 구입
-             </Button>
+    <View style={{flex : 1}}>
+      <View style={{ backgroundColor: 'black', flexDirection: 'row' , flex : 0.55 }}>
+        <View style={{ backgroundColor: '#F3B438', height: 46, flex: 2, alignItems: 'center', justifyContent: 'center', margin: 2 }}>
+          <Image  
+            style={{ height: 50, width: 50, resizeMode: 'contain' }}
+            source={require('./assets/Title_Image.png')} />
+        </View>
+
+        <View style={{ backgroundColor: '#F3B438', height: 46, flex: 5, alignItems: 'center', justifyContent: 'center', margin: 2 }}>
+          <Text style={{ fontSize: 35 }} >직원</Text>
+        </View>
+        <View style={{ backgroundColor: '#F3B438', height: 46, flex: 1, alignItems: 'center', justifyContent: 'center', margin: 2 }}>
+          <TouchableOpacity onPress={moveToMain}>
+            <Image style={{ height: 40, width: 40, resizeMode: 'contain' }} source={require('./assets/cancel.png')} />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      <View style={{flex : 6}}>  
+        <StatusBar hidden={true} />
+        <ScrollView>
+          <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+            <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+                <Image  
+                  style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                  source={require('./assets/elephant.png')}/>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+                <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>코끼리 사육사</Text>
+                  <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                    <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>돈</Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                  <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                    labelStyle={{ color: "black", fontSize: 16 }}> 구입
+                </Button>
+                </View>
+              </View>
+            </View>
           </View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image
-              style={{ height: 100, width: 100, resizeMode: 'contain' }}
-              source={require('./assets/giraffe.png')} backgroundColor='skyblue' />
-            <Text style={{ fontSize: 30 }} >기린 사육사</Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 구입
-             </Button>
+
+          <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+            <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+                <Image  //코끼리
+                  style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                  source={require('./assets/giraffe.png')}/>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+                <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>기린 사육사</Text>
+                  <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                    <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>돈</Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                  <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                    labelStyle={{ color: "black", fontSize: 16 }}> 구입
+                </Button>
+                </View>
+              </View>
+            </View>
           </View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image
-              style={{ height: 100, width: 100, resizeMode: 'contain' }}
-              source={require('./assets/monkey.png')} backgroundColor='skyblue' />
-            <Text style={{ fontSize: 30 }} >원숭이사육사</Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 구입
-             </Button>
+
+          <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+            <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+                <Image  //코끼리
+                  style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                  source={require('./assets/monkey.png')}/>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+                <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>원숭이 사육사</Text>
+                  <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                    <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>돈</Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                  <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                    labelStyle={{ color: "black", fontSize: 16 }}> 구입
+                </Button>
+                </View>
+              </View>
+            </View>
           </View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image
-              style={{ height: 100, width: 100, resizeMode: 'contain' }}
-              source={require('./assets/penguin.png')} backgroundColor='skyblue' />
-            <Text style={{ fontSize: 30 }} >펭귄 사육사</Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 구입
-             </Button>
+          
+          <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+            <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+                <Image  //코끼리
+                  style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                  source={require('./assets/penguin.png')}/>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+                <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>펭귄 사육사</Text>
+                  <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                    <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>돈</Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                  <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                    labelStyle={{ color: "black", fontSize: 16 }}> 구입
+                </Button>
+                </View>
+              </View>
+            </View>
           </View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image
-              style={{ height: 100, width: 100, resizeMode: 'contain' }}
-              source={require('./assets/tiger.png')} backgroundColor='skyblue' />
-            <Text style={{ fontSize: 30 }} >호랑이사육사</Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 구입
-             </Button>
+
+          <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+            <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+                <Image  
+                  style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                  source={require('./assets/tiger.png')}/>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+                <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>호랑이 사육사</Text>
+                  <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                    <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>돈</Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                  <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                    labelStyle={{ color: "black", fontSize: 16 }}> 구입
+                </Button>
+                </View>
+              </View>
+            </View>
           </View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image
-              style={{ height: 100, width: 100, resizeMode: 'contain' }}
-              source={require('./assets/lion.png')} backgroundColor='skyblue' />
-            <Text style={{ fontSize: 30 }} >사자 사육사</Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 구입
-             </Button>
+
+          <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+            <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+                <Image 
+                  style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                  source={require('./assets/lion.png')}/>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+                <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>사자 사육사</Text>
+                  <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                    <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>돈</Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                  <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                    labelStyle={{ color: "black", fontSize: 16 }}> 구입
+                </Button>
+                </View>
+              </View>
+            </View>
+          </View>
+          
+          <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+            <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+                <Image 
+                  style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                  source={require('./assets/lion.png')}/>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+                <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>사자 사육사</Text>
+                  <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                    <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>돈</Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                  <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                    labelStyle={{ color: "black", fontSize: 16 }}> 구입
+                </Button>
+                </View>
+              </View>
+            </View>
+          </View>
+
+          <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+            <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+                <Image 
+                  style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                  source={require('./assets/lion.png')}/>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+                <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>사자 사육사</Text>
+                  <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                    <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>돈</Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                  <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                    labelStyle={{ color: "black", fontSize: 16 }}> 구입
+                </Button>
+                </View>
+              </View>
+            </View>
+          </View>
+
+          <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+            <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+                <Image 
+                  style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                  source={require('./assets/lion.png')}/>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+                <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>사자 사육사</Text>
+                  <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                    <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>돈</Text>
+                  </View>
+                </View>
+                <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                  <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                    labelStyle={{ color: "black", fontSize: 16 }}> 구입
+                </Button>
+                </View>
+              </View>
+            </View>
+          </View>
+        </ScrollView>
+      </View>
+
+      <View style={{ flex: 0.5, backgroundColor: '#F3B438', flexDirection: 'row', justifyContent: 'center' }}>
+        <View style={{ backgroundColor: 'black', flex: 1 , justifyContent : 'center', alignItems: 'center'}}>
+          <View style={{backgroundColor: '#F3B438', width : 100, alignItems:'center'}}>
+            <Image style={{ height: 40, width: 40, resizeMode: 'contain', }} source={require('./assets/dollar.png')} />
           </View>
         </View>
-      </ScrollView>
+        <View style={{ alignItems: 'center', backgroundColor: 'black', flex: 3 }}>
+          <View style={{backgroundColor: '#F3B438', height : 40,  width : 300, margin : 3, justifyContent : 'center', alignItems : 'flex-end'}}>
+            <Text style={{fontSize : 25}}>12345</Text>
+          </View>
+        </View>
+      </View>
+
     </View>
   );
 }
@@ -586,23 +1266,6 @@ function RouletteScreen({ navigation, route }) { //뽑기
     navigation.navigate("Main", { post: Money });
   }
 
-  const [AA, setPostText] = useState(1000);
-
-
-  const probability = () => {
-    if (Random.getRandomBytes(1) % 100 <= 5) {
-      imageC(require('./assets/lion.png'));
-      //이미지 바꾸는 코드
-    }
-    else if (Random.getRandomBytes(1) % 100 > 10 && Random.getRandomBytes(1) % 100 <= 40) {
-      imageC(require('./assets/monkey.png'));
-      //이미지 바꾸는 코드
-    }
-    else {
-      imageC(require('./assets/tiger.png'));
-      //이미지 바꾸는 코드
-    }
-  }
 
 
 
@@ -627,26 +1290,26 @@ function RouletteScreen({ navigation, route }) { //뽑기
     <View>
       <StatusBar hidden={true} />
       <View style={styles.questbutton}>
-       
-      <Button mode="contained" compact="true" color="brown" contentStyle={{ height: 40, width: 80 }}
-        labelStyle={{ color: "white", fontSize: 30 }} onPress={moveToMain} >X
+
+        <Button mode="contained" compact="true" color="brown" contentStyle={{ height: 40, width: 80 }}
+          labelStyle={{ color: "white", fontSize: 30 }} onPress={moveToMain} >X
         </Button>
       </View>
 
-     <View style={{alignItems: 'center'}}>
-      <Text style={{ alignItems: 'center', justifyContent: 'center', fontSize: 30 }}>{route.params?.post + Money} </Text>
-      <Text style={{ fontSize: 80 }} >뽑기</Text>
+      <View style={{ alignItems: 'center' }}>
+        <Text style={{ alignItems: 'center', justifyContent: 'center', fontSize: 30 }}>{route.params?.post + Money} </Text>
+        <Text style={{ fontSize: 80 }} >뽑기</Text>
 
-      <Image
-        style={{ height: 200, width: 200, resizeMode: 'contain' }}
-        source={image} />
+        <Image
+          style={{ height: 200, width: 200, resizeMode: 'contain' }}
+          source={image} />
 
-      <Text style={{ fontSize: 40 }} ></Text>
-      <Button mode="contained" compact="true" color="brown" contentStyle={{ height: 40, width: 200 }}
-        labelStyle={{ color: "white", fontSize: 30 }} onPress={decreaseCounter} >뽑기
+        <Text style={{ fontSize: 40 }} ></Text>
+        <Button mode="contained" compact="true" color="brown" contentStyle={{ height: 40, width: 200 }}
+          labelStyle={{ color: "white", fontSize: 30 }} onPress={decreaseCounter} >뽑기
       </Button>
 
-        </View>
+      </View>
     </View>
   );
 
@@ -660,122 +1323,236 @@ function QuestScreen({ navigation }) { //업적
   }
   return (
     <View>
-      <View style={styles.quest}>
-        <View style={{flex : 1}}>
-          <Text>업적</Text>
-        </View>       
-        <View>
-          <Button mode="contained" compact="true" color="black" contentStyle={{ height: 50, width: 103 }}
-            labelStyle={{ color: "white", fontSize: 16 }} onPress={moveToMain}> X
-          </Button>
-        </View>
+    <View style={{ backgroundColor: 'black', flexDirection: 'row' }}>
+      <View style={{ backgroundColor: '#F3B438', height: 46, flex: 2, alignItems: 'center', justifyContent: 'center', margin: 2 }}>
+        <Image  
+          style={{ height: 50, width: 50, resizeMode: 'contain' }}
+          source={require('./assets/medal.png')} />
       </View>
-      <View style={styles.AnimalSceenBackColor} >
-        <StatusBar hidden={true} />
-        <ScrollView>
-          <View style={styles.AnimalSceenStyle}>
-            <Image  //코끼리
-              style={{ height: 80, width: 80, resizeMode: 'contain' }}
-              source={require('./assets/medal.png')} backgroundColor='brown' />
-            <Text style={{ fontSize: 30 }} > 코끼리 </Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="red" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 구입
-             </Button>
-          </View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image  //기린
-              style={{ height: 80, width: 80, resizeMode: 'contain' }}
-              source={require('./assets/medal.png')} backgroundColor='brown' />
-            <Text style={{ fontSize: 30 }} >   기린   </Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 구입
-             </Button>
-          </View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image  //원숭이
-              style={{ height: 80, width: 80, resizeMode: 'contain' }}
-              source={require('./assets/medal.png')} backgroundColor='brown' />
-            <Text style={{ fontSize: 30 }} > 원숭이 </Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 구입
-             </Button>
-          </View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image  //펭귄
-              style={{ height: 80, width: 80, resizeMode: 'contain' }}
-              source={require('./assets/medal.png')} backgroundColor='brown' />
-            <Text style={{ fontSize: 30 }} >   펭귄   </Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 구입
-             </Button>
-          </View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image   //호랑이
-              style={{ height: 80, width: 80, resizeMode: 'contain' }}
-              source={require('./assets/medal.png')} backgroundColor='brown' />
-            <Text style={{ fontSize: 30 }} > 호랑이 </Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 구입
-             </Button>
-          </View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image   //사자
-              style={{ height: 80, width: 80, resizeMode: 'contain' }}
-              source={require('./assets/medal.png')} backgroundColor='brown' />
-            <Text style={{ fontSize: 30 }} >   사자   </Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 동물
-             </Button>
-          </View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image   //사자
-              style={{ height: 80, width: 80, resizeMode: 'contain' }}
-              source={require('./assets/medal.png')} backgroundColor='brown' />
-            <Text style={{ fontSize: 30 }} >   사자   </Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 동물
-             </Button>
-          </View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image   //사자
-              style={{ height: 80, width: 80, resizeMode: 'contain' }}
-              source={require('./assets/medal.png')} backgroundColor='brown' />
-            <Text style={{ fontSize: 30 }} >   사자   </Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 동물
-             </Button>
-          </View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image   //사자
-              style={{ height: 80, width: 80, resizeMode: 'contain' }}
-              source={require('./assets/medal.png')} backgroundColor='brown' />
-            <Text style={{ fontSize: 30 }} >   사자   </Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 동물
-             </Button>
-          </View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image   //사자
-              style={{ height: 80, width: 80, resizeMode: 'contain' }}
-              source={require('./assets/medal.png')} backgroundColor='brown' />
-            <Text style={{ fontSize: 30 }} >   사자   </Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 동물
-             </Button>
-          </View>
-          <View style={styles.AnimalSceenStyle}>
-            <Image   //사자
-              style={{ height: 80, width: 80, resizeMode: 'contain' }}
-              source={require('./assets/medal.png')} backgroundColor='brown' />
-            <Text style={{ fontSize: 30 }} >   사자   </Text>
-            <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color="black" contentStyle={{ height: 40, width: 102.5 }}
-              labelStyle={{ color: "white", fontSize: 16 }}> 동물
-             </Button>
-          </View>
 
-        </ScrollView>
+      <View style={{ backgroundColor: '#F3B438', height: 46, flex: 5, alignItems: 'center', justifyContent: 'center', margin: 2 }}>
+        <Text style={{ fontSize: 35 }} >업적</Text>
+      </View>
+      <View style={{ backgroundColor: '#F3B438', height: 46, flex: 1, alignItems: 'center', justifyContent: 'center', margin: 2 }}>
+        <TouchableOpacity onPress={moveToMain}>
+          <Image style={{ height: 40, width: 40, resizeMode: 'contain' }} source={require('./assets/cancel.png')} />
+        </TouchableOpacity>
       </View>
     </View>
+
+    <View >  
+      <StatusBar hidden={true} />
+      <ScrollView>
+        <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+          <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+            <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+              <Image  
+                style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                source={require('./assets/medal.png')}/>
+            </View>
+            <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 20 }}>메인 건물 100번 클릭</Text>
+                <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>5.1A</Text>
+                </View>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                  labelStyle={{ color: "black", fontSize: 16 }}> 획득
+              </Button>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+          <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+            <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+              <Image  //코끼리
+                style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                source={require('./assets/medal.png')}/>
+            </View>
+            <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 20 }}>동물 업그레이드 100번</Text>
+                <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>12.2B</Text>
+                </View>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                  labelStyle={{ color: "black", fontSize: 16 }}> 획득
+              </Button>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+          <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+            <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+              <Image  //코끼리
+                style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                source={require('./assets/medal.png')}/>
+            </View>
+            <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 20 }}>상점 업그레이드 10번</Text>
+                <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>16.5B</Text>
+                </View>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                  labelStyle={{ color: "black", fontSize: 16 }}> 획득
+              </Button>
+              </View>
+            </View>
+          </View>
+        </View>
+        
+        <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+          <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+            <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+              <Image  //코끼리
+                style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                source={require('./assets/medal.png')}/>
+            </View>
+            <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 20}}>직원 업그레이드 100번</Text>
+                <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>18.3B</Text>
+                </View>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                  labelStyle={{ color: "black", fontSize: 16 }}> 획득
+              </Button>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+          <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+            <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+              <Image  
+                style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                source={require('./assets/medal.png')}/>
+            </View>
+            <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 20 }}>뽑기 10번</Text>
+                <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>24.5F</Text>
+                </View>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                  labelStyle={{ color: "black", fontSize: 16 }}> 획득
+              </Button>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+          <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+            <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+              <Image 
+                style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                source={require('./assets/medal.png')}/>
+            </View>
+            <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 20 }}>업적 내용</Text>
+                <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>17.4A</Text>
+                </View>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                  labelStyle={{ color: "black", fontSize: 16 }}> 획득
+              </Button>
+              </View>
+            </View>
+          </View>
+        </View>
+        
+        <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+          <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+            <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+              <Image 
+                style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                source={require('./assets/medal.png')}/>
+            </View>
+            <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 20 }}>업적 내용</Text>
+                <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>17.4A</Text>
+                </View>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                  labelStyle={{ color: "black", fontSize: 16 }}> 획득
+              </Button>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+          <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+            <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+              <Image 
+                style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                source={require('./assets/medal.png')}/>
+            </View>
+            <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>업적 내용</Text>
+                <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>17.4A</Text>
+                </View>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                  labelStyle={{ color: "black", fontSize: 16 }}> 획득
+              </Button>
+              </View>
+            </View>
+          </View>
+        </View>
+
+        <View style={{ backgroundColor: '#CFC810', height: 100 }}>
+          <View style={{ backgroundColor: 'black', margin: 5, flex: 1, flexDirection: 'row' }}>
+            <View style={{ backgroundColor: '#B46E06', flex: 1, right: 2.5, alignItems: 'center', justifyContent: 'center' }}>
+              <Image 
+                style={{ height: 80, width: 80, resizeMode: 'contain' }}
+                source={require('./assets/medal.png')}/>
+            </View>
+            <View style={{ backgroundColor: '#B46E06', flex: 3, left: 2.5, flexDirection: 'row' }}>
+              <View style={{ backgroundColor: 'gray', flex: 2, }}>
+                <Text style={{ backgroundColor: '#B46E06', height: 45, fontSize: 25 }}>업적 내용</Text>
+                <View style={{ margin: 5, backgroundColor: 'yellow' }}>
+                  <Text style={{ backgroundColor: '#B46E06', height: 35, fontSize: 20,}}>돈</Text>
+                </View>
+              </View>
+              <View style={{ backgroundColor: '#B46E06', flex: 1, justifyContent: 'center', margin: 5 }}>
+                <Button icon={require('./assets/Title_Image.png')} mode="contained" compact="true" color='#FCFF70' Style={{ height: 20, width: 60 }}
+                  labelStyle={{ color: "black", fontSize: 16 }}> 획득
+              </Button>
+              </View>
+            </View>
+          </View>
+        </View>
+
+      </ScrollView>
+    </View>
+  </View>
   );
 }
 
@@ -786,33 +1563,71 @@ function AnimalBookScreen({ navigation, route }) { //도감
   }
 
   useEffect(() => {
-    if (route.params?.Animal == true) {
-      hide();
+    if (route.params?.Animal == 'ele') {
+      Ele();
+    }
+
+    else if(route.params?.Animal == 'gir')
+    { 
+      Gir();
     }
   }, [route.params?.Animal]);
 
-  const [image, imageC_M] = useState();
-  const hide = () => {
-    imageC_M(require('./assets/monkey.png'));
+  const [image_e, imageC_E] = useState();
+  const [image_g, imageC_G] = useState();
+  const Ele = () => {  
+      imageC_E(require('./assets/elephant.png'));   
   }
+
+  const Gir = () => {
+    imageC_G(require('./assets/giraffe.png'));
+  }
+
 
   return (
     <View style={styles.AppBarStyle}>
-       <View style={styles.quest}>
-        <View style={{flex : 1}}>
-          <Text>도감</Text>
-        </View>       
-        <View>
-          <Button mode="contained" compact="true" color="black" contentStyle={{ height: 50, width: 103 }}
-            labelStyle={{ color: "white", fontSize: 16 }} onPress={moveToMain}> X
-          </Button>
+      <View style={{ backgroundColor: 'black', flexDirection: 'row' }}>
+        <View style={{ backgroundColor: '#F3B438', height: 46, flex: 2, alignItems: 'center', justifyContent: 'center', margin: 2 }}>
+          <Image
+            style={{ height: 50, width: 50, resizeMode: 'contain' }}
+            source={require('./assets/book.png')} />
+        </View>
+
+        <View style={{ backgroundColor: '#F3B438', height: 46, flex: 5, alignItems: 'center', justifyContent: 'center', margin: 2 }}>
+          <Text style={{ fontSize: 35 }} >도감</Text>
+        </View>
+
+        <View style={{ backgroundColor: '#F3B438', height: 46, flex: 1, alignItems: 'center', justifyContent: 'center', margin: 2 }}>
+          <TouchableOpacity onPress={moveToMain}>
+            <Image style={{ height: 40, width: 40, resizeMode: 'contain' }} source={require('./assets/cancel.png')} />
+          </TouchableOpacity>
         </View>
       </View>
-      <View style={styles.box2}>
+
+
+
+
+    <ScrollView>
+      <View style={{ backgroundColor: '#CFC810', flexDirection: 'row' }}>
         <View style={styles.box}>
           <Image
             style={{ height: 100, width: 100, resizeMode: 'contain' }}
-            source={image} backgroundColor='skyblue' />
+            source={image_e} backgroundColor='skyblue' />
+          <Text style={{ fontSize: 20, color: "black", }}>코끼리과 동물. 포유류 기다란 코와 큰 몸이 특징이다. 지상에서 가장 큰 동물. 2t~6t까지 나간다.</Text>
+        </View>
+
+        <View style={styles.box}>
+          <Image
+            style={{ height: 100, width: 100, resizeMode: 'contain' }}
+            source={image_g} backgroundColor='skyblue' />
+          <Text style={{ fontSize: 30, color: "black" }}> 1</Text>
+        </View>
+      </View>
+      <View style={{ backgroundColor: '#CFC810', flexDirection: 'row' }}>
+        <View style={styles.box}>
+          <Image
+            style={{ height: 100, width: 100, resizeMode: 'contain' }}
+            source={require('./assets/lion.png')} backgroundColor='skyblue' />
           <Text style={{ fontSize: 30, color: "white" }}> 1</Text>
         </View>
         <View style={styles.box}>
@@ -822,7 +1637,7 @@ function AnimalBookScreen({ navigation, route }) { //도감
           <Text style={{ fontSize: 30, color: "white" }}> 1</Text>
         </View>
       </View>
-      <View style={styles.box2}>
+      <View style={{ backgroundColor: '#CFC810', flexDirection: 'row' }}>
         <View style={styles.box}>
           <Image
             style={{ height: 100, width: 100, resizeMode: 'contain' }}
@@ -836,9 +1651,22 @@ function AnimalBookScreen({ navigation, route }) { //도감
           <Text style={{ fontSize: 30, color: "white" }}> 1</Text>
         </View>
       </View>
+      <View style={{ backgroundColor: '#CFC810', flexDirection: 'row' }}>
+        <View style={styles.box}>
+          <Image
+            style={{ height: 100, width: 100, resizeMode: 'contain' }}
+            source={require('./assets/lion.png')} backgroundColor='skyblue' />
+          <Text style={{ fontSize: 30, color: "white" }}> 1</Text>
+        </View>
+        <View style={styles.box}>
+          <Image
+            style={{ height: 100, width: 100, resizeMode: 'contain' }}
+            source={require('./assets/lion.png')} backgroundColor='skyblue' />
+          <Text style={{ fontSize: 30, color: "white" }}> 1</Text>
+        </View>
+      </View>
+      </ScrollView>
     </View>
-
-
   );
 }
 
@@ -882,15 +1710,15 @@ const styles = StyleSheet.create({
     color: 'red',
   },
   MainScreenStyle: {
-    flex: 6,
-    backgroundColor: 'white',
+    
+   
     alignItems: 'center',
     justifyContent: 'center',
   },
 
   MainScreenAni: {
-    flex: 1,
-    backgroundColor: 'white',
+    
+
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -900,7 +1728,8 @@ const styles = StyleSheet.create({
   },
 
   ButtenStyle: {
-    flex: 0.5,
+    flex: 0.4,
+    backgroundColor : 'gray',
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'center',
@@ -908,7 +1737,7 @@ const styles = StyleSheet.create({
 
   TopStyle:
   {
-    flex: 1,
+    flex: 0.4,
     flexDirection: 'row',
     alignItems: 'flex-start',
     justifyContent: 'center',
@@ -919,7 +1748,7 @@ const styles = StyleSheet.create({
     flex: 2,
     flexDirection: 'row',
     alignItems: 'flex-start',
-    justifyContent: 'space-around',
+    justifyContent: 'space-around'
   },
 
   AnimalSceenBackColor: {
@@ -953,22 +1782,23 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
     marginTop: 22,
+    backgroundColor: "rgba(0,0,0,0.5)"
   },
 
   modalView: {
     margin: 20,
     backgroundColor: 'white',
     borderRadius: 20,
-    padding: 35,
+    padding: 20,
     alignItems: 'center',
     shadowColor: '#000',
     shadowOffset: {
       width: 0,
-      height: 2,
+      height: 4,
     },
     shadowOpacity: 0.25,
     shadowRadius: 3.84,
-    elevation: 5,
+    elevation: 25,
 
     //창크기
     width: 300,
@@ -986,8 +1816,8 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   modalText: {
-    marginBottom: 15,
-    textAlign: 'center',
+    fontSize: 40,
+    marginBottom: 50,
   },
 
   buttona: {
@@ -998,10 +1828,11 @@ const styles = StyleSheet.create({
   },
 
   box: {
-    width: 210,
-    height: 300,
-    backgroundColor: "blue",
+    width: 200,
+    height: 307,
+    backgroundColor: '#B46E06',
     alignItems: 'center',
+    margin : 5,
   },
 
   box2: {
@@ -1017,7 +1848,13 @@ const styles = StyleSheet.create({
 
   questbutton: {
     alignItems: 'flex-end',
-  }
+  },
 
+  SettingScreen: {
+    flex: 1,
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+
+  }
 
 });
